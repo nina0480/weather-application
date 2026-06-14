@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nimbus — Weather Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Google Fonts: Space Grotesk (display) + Inter (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+</head>
+<body class="weather-default">
+
+  <!-- Animated background layers -->
+  <div class="bg-layer bg-gradient" aria-hidden="true"></div>
+  <div class="bg-layer bg-particles" id="bgParticles" aria-hidden="true"></div>
+
+  <div class="app-shell">
+
+    <!-- ── HEADER ───────────────────────────────────────── -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-icon">◎</span>
+        <span class="brand-name">Nimbus</span>
+      </div>
+
+      <div class="header-controls">
+        <!-- Unit toggle -->
+        <button class="pill-toggle" id="unitToggle" aria-label="Toggle temperature unit">
+          <span class="pill-opt" data-unit="C">°C</span>
+          <span class="pill-opt" data-unit="F">°F</span>
+          <span class="pill-thumb" id="unitThumb"></span>
+        </button>
+
+        <!-- Theme toggle -->
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle dark/light mode" title="Toggle theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ── SEARCH ─────────────────────────────────────────── -->
+    <section class="search-section" aria-label="City search">
+      <div class="search-wrap">
+        <div class="search-box" role="search">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            id="cityInput"
+            class="search-input"
+            placeholder="Search a city…"
+            autocomplete="off"
+            aria-label="City name"
+          />
+          <button class="search-btn" id="searchBtn" aria-label="Search">Search</button>
+        </div>
+
+        <!-- Locate me button -->
+        <button class="locate-btn" id="locateBtn" title="Use my location" aria-label="Detect my location">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+            <circle cx="12" cy="12" r="9" stroke-dasharray="4 2"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Recent searches -->
+      <div class="recent-wrap" id="recentWrap" aria-label="Recent searches" hidden>
+        <span class="recent-label">Recent</span>
+        <div class="recent-chips" id="recentChips"></div>
+        <button class="clear-recent" id="clearRecent" aria-label="Clear recent searches">Clear</button>
+      </div>
+    </section>
+
+    <!-- ── ERROR BANNER ──────────────────────────────────── -->
+    <div class="error-banner" id="errorBanner" role="alert" aria-live="polite" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span id="errorText"></span>
+    </div>
+
+    <!-- ── LOADING SPINNER ──────────────────────────────── -->
+    <div class="loader-wrap" id="loaderWrap" hidden aria-live="polite" aria-label="Loading weather data">
+      <div class="loader-ring"></div>
+      <p class="loader-text">Fetching weather…</p>
+    </div>
+
+    <!-- ── MAIN DASHBOARD ───────────────────────────────── -->
+    <main class="dashboard" id="dashboard" hidden>
+
+      <!-- Current weather card (hero) -->
+      <section class="card card-hero" aria-label="Current weather">
+        <div class="hero-left">
+          <p class="hero-location" id="heroLocation">—</p>
+          <p class="hero-date" id="heroDate">—</p>
+          <div class="hero-temp-row">
+            <span class="hero-temp" id="heroTemp">—</span>
+            <div class="hero-meta">
+              <p class="hero-condition" id="heroCondition">—</p>
+              <p class="hero-feels" id="heroFeels">Feels like —</p>
+            </div>
+          </div>
+        </div>
+        <div class="hero-right">
+          <img class="hero-icon" id="heroIcon" src="" alt="Weather condition icon" />
+        </div>
+      </section>
+
+      <!-- Stats row -->
+      <div class="stats-grid">
+        <article class="card stat-card" aria-label="Humidity">
+          <div class="stat-icon">💧</div>
+          <div class="stat-info">
+            <span class="stat-value" id="statHumidity">—</span>
+            <span class="stat-label">Humidity</span>
+          </div>
+        </article>
+        <article class="card stat-card" aria-label="Wind speed">
+          <div class="stat-icon">💨</div>
+          <div class="stat-info">
+            <span class="stat-value" id="statWind">—</span>
+            <span class="stat-label">Wind</span>
+          </div>
+        </article>
+        <article class="card stat-card" aria-label="Atmospheric pressure">
+          <div class="stat-icon">🌡️</div>
+          <div class="stat-info">
+            <span class="stat-value" id="statPressure">—</span>
+            <span class="stat-label">Pressure</span>
+          </div>
+        </article>
+        <article class="card stat-card" aria-label="Visibility">
+          <div class="stat-icon">👁️</div>
+          <div class="stat-info">
+            <span class="stat-value" id="statVisibility">—</span>
+            <span class="stat-label">Visibility</span>
+          </div>
+        </article>
+      </div>
+
+      <!-- 5-day forecast -->
+      <section class="card card-forecast" aria-label="5-day forecast">
+        <h2 class="section-title">5-Day Forecast</h2>
+        <div class="forecast-row" id="forecastRow">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ── EMPTY STATE ──────────────────────────────────── -->
+    <div class="empty-state" id="emptyState" aria-label="Start by searching a city">
+      <div class="empty-art">◎</div>
+      <p class="empty-title">Where in the world?</p>
+      <p class="empty-sub">Search a city above — or let Nimbus find you.</p>
+    </div>
+
+  </div><!-- /app-shell -->
+
+  <script src="script.js"></script>
+</body>
+</html>
